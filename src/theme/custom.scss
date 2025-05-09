@@ -1,0 +1,114 @@
+/* Custom variables and styling for the app */
+:root {
+  /* Colors for the app */
+  --app-primary-color: #ffc409;
+  --app-secondary-color: #3880ff;
+  --app-background-color: #ffffff;
+  --app-text-color: #333333;
+  --app-button-text-color: #ffffff;
+}
+
+/* Global styles */
+.center-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  text-align: center;
+}
+
+/* Welcome screen styles */
+.welcome-container {
+  background-color: var(--app-background-color);
+  
+  .logo-container {
+    margin-bottom: 20px;
+    
+    .logo-placeholder {
+      width: 140px;
+      height: 60px;
+      background-color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      margin: 0 auto;
+    }
+  }
+  
+  .welcome-text {
+    margin-bottom: 40px;
+    font-size: 24px;
+    font-weight: 500;
+  }
+}
+
+/* Button styling */
+.primary-button {
+  --background: var(--app-primary-color);
+  --color: var(--app-text-color);
+  --border-radius: 28px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 500;
+  text-transform: none;
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Authentication screen styles */
+.auth-container {
+  .greeting-text {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 40px;
+  }
+  
+  .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 280px;
+    gap: 16px;
+    
+    ion-button {
+      margin: 0;
+    }
+  }
+  
+  .signin-button {
+    --background: var(--app-secondary-color);
+    --color: var(--app-button-text-color);
+  }
+  
+  .signup-button {
+    --background: #e0e0e0;
+    --color: var(--app-text-color);
+  }
+}
+
+/* Or separator */
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: var(--ion-color-medium);
+  
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--ion-color-medium-shade);
+  }
+  
+  &::before {
+    margin-right: 10px;
+  }
+  
+  &::after {
+    margin-left: 10px;
+  }
+}

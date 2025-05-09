@@ -1,23 +1,32 @@
 import React from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
+import { IonContent, IonPage, IonButton, useIonRouter } from '@ionic/react';
+import Logo from '../components/Logo';
+import '../theme/custom.scss';
 import './Tab1.css';
 
 const Tab1: React.FC = () => {
+  const router = useIonRouter();
+
+  const handleStart = () => {
+    // Navigate to Tab2 (auth screen)
+    router.push('/tab2');
+  };
+
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Tab 1</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Tab 1</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <ExploreContainer name="Tab 1 page" />
+        <div className="center-content welcome-container">
+          <div className="logo-container">
+            <Logo size="medium" />
+          </div>
+          <h2 className="welcome-text">Empecemos</h2>
+          <IonButton 
+            className="primary-button" 
+            onClick={handleStart}
+          >
+            Continuar →
+          </IonButton>
+        </div>
       </IonContent>
     </IonPage>
   );

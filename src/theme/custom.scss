@@ -112,3 +112,37 @@
     margin-left: 10px;
   }
 }
+/* Custom variables and styling for the app */
+:root {
+  /* Updated colors to match the Sound Therapy logo */
+  --app-primary-color: #4A4799; /* Purple/indigo from the logo */
+  --app-secondary-color: #3E3B86; /* Slightly darker variant for secondary */
+  --app-background-color: #ffffff;
+  --app-text-color: #333333;
+  --app-button-text-color: #ffffff;
+}
+
+.logo-container {
+    margin-bottom: 20px;
+    
+    .sound-therapy-logo {
+      width: 140px;
+      height: 140px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      margin: 0 auto;
+      overflow: visible;
+    }
+  }
+  
+.signin-button {
+    --background: var(--app-primary-color);
+    --color: var(--app-button-text-color);
+  }
+  
+  .signup-button {
+    --background: #e0e0e0;
+    --color: var(--app-primary-color);
+  }

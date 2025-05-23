@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonButton, IonIcon, IonCard, IonCardContent } from '@ionic/angular/standalone';
+import { IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   checkmarkCircle, closeCircle, warning, informationCircle, 
@@ -324,9 +324,7 @@ import { NotificationService, AppNotification } from '../../services/notificatio
   imports: [
     CommonModule,
     IonButton,
-    IonIcon,
-    IonCard,
-    IonCardContent
+    IonIcon
   ]
 })
 export class NotificationComponent implements OnInit, OnDestroy {

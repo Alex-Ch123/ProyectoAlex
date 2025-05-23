@@ -32,10 +32,10 @@ export class NotificationService {
 
   private async checkNotificationPermission(): Promise<void> {
     if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
+      if ((window as any).Notification.permission === 'granted') {
         this.hasPermission = true;
-      } else if (Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
+      } else if ((window as any).Notification.permission === 'default') {
+        const permission = await (window as any).Notification.requestPermission();
         this.hasPermission = permission === 'granted';
       }
     }
@@ -43,7 +43,7 @@ export class NotificationService {
 
   async requestPermission(): Promise<boolean> {
     if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
+      const permission = await (window as any).Notification.requestPermission();
       this.hasPermission = permission === 'granted';
       return this.hasPermission;
     }
@@ -90,12 +90,12 @@ export class NotificationService {
   private showBrowserNotification(notification: AppNotification): void {
     if (!this.hasPermission) return;
 
-    const browserNotif = new Notification(notification.title, {
+    const browserNotif = new (window as any).Notification(notification.title, {
       body: notification.message,
       icon: '/assets/icon/favicon.png',
       tag: notification.id,
       badge: '/assets/icon/favicon.png',
-      
+      vibrate: notification.type === 'routine' ? [200, 100, 200] : undefined
     });
 
     browserNotif.onclick = () => {

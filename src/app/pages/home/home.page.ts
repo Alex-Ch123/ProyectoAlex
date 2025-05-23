@@ -1,10 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, 
          IonCardTitle, IonCardContent, IonIcon, IonButton, IonProgressBar,
-         IonChip, IonLabel, IonText, IonGrid, IonRow, IonCol, IonBadge,
-         IonModal, IonInput, IonTextarea, IonSelect, IonSelectOption,
-         IonCheckbox, IonItem, IonList, IonItemSliding, IonItemOptions,
-         IonItemOption, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
+         IonChip, IonLabel, IonBadge, IonModal, IonInput, IonTextarea,
+         IonCheckbox, IonItem, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -1076,13 +1074,12 @@ import { ScheduledRoutinesService, ScheduledRoutine, RoutineTemplate } from '../
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonIcon, IonButton, IonProgressBar, IonChip, IonLabel,
-    IonText, IonGrid, IonRow, IonCol, IonBadge,
-    IonModal, IonInput, IonTextarea, IonSelect, IonSelectOption,
-    IonCheckbox, IonItem, IonList, IonItemSliding, IonItemOptions,
-    IonItemOption, IonSegment, IonSegmentButton
+    IonBadge, IonModal, IonInput, IonTextarea,
+    IonCheckbox, IonItem, IonSegment, IonSegmentButton
   ]
 })
 export class HomePage implements OnInit, OnDestroy {
+  Math=Math;
   // Estados principales
   stats: UserStats = {
     totalSessions: 0,
@@ -1451,5 +1448,10 @@ export class HomePage implements OnInit, OnDestroy {
     // Aquí podrías integrar con el AudioService
     console.log('Reproduciendo sonido recomendado:', sound);
     // Por ejemplo: this.audioService.playFrequency(sound.frequency, sound.duration, 50, 'sine');
+  }
+
+  // Método para Math.round en el template
+  mathRound(value: number): number {
+    return Math.round(value);
   }
 }

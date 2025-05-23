@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonRange, 
          IonItem, IonLabel, IonButton, IonCard, IonCardContent,
-         IonSegment, IonSegmentButton, IonIcon, IonText } from '@ionic/angular/standalone';
+         IonIcon, IonText } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -244,8 +244,7 @@ import { StatisticsService } from '../../services/statistics.service';
     FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonRange, IonItem, IonLabel, IonButton, IonCard, 
-    IonCardContent, IonSegment, IonSegmentButton, 
-    IonIcon, IonText,
+    IonCardContent, IonIcon, IonText,
     WaveformVisualizerComponent
   ]
 })

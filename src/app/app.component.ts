@@ -5,12 +5,12 @@ import { NotificationComponent } from './components/notification/notification.co
 
 @Component({
   selector: 'app-root',
-  template: 
+  template: `
     <ion-app>
       <ion-router-outlet></ion-router-outlet>
       <app-notification></app-notification>
     </ion-app>
-  ,
+  `,
   standalone: true,
   imports: [
     CommonModule,

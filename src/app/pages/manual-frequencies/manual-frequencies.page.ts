@@ -1,11 +1,13 @@
+// src/app/pages/manual-frequencies/manual-frequencies.page.ts
 import { Component, OnDestroy } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonRange, 
          IonItem, IonLabel, IonButton, IonCard, IonCardContent,
-         IonSegment, IonSegmentButton, IonIcon, IonText } from '@ionic/angular/standalone';
+         IonSegment, IonSegmentButton, IonIcon, IonText, IonGrid,
+         IonRow, IonCol, IonChip } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { play, stop, pulse } from 'ionicons/icons';
+import { play, stop, pulse, musicalNotes, volumeHigh, time } from 'ionicons/icons';
 import { AudioService, WaveformType } from '../../services/audio.service';
 import { WaveformVisualizerComponent } from '../../components/waveform-visualizer/waveform-visualizer.component';
 import { AlertController } from '@ionic/angular';
@@ -13,27 +15,32 @@ import { AlertController } from '@ionic/angular';
 @Component({
   selector: 'app-manual-frequencies',
   template: `
-    <ion-header>
+    <ion-header class="modern-header">
       <ion-toolbar>
         <ion-title>
-          <ion-icon name="pulse"></ion-icon>
-          Generador de Frecuencias
+          <div class="title-container">
+            <ion-icon name="pulse" class="title-icon"></ion-icon>
+            <span class="title-text">Generador de Frecuencias</span>
+          </div>
         </ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content class="frequency-content">
       <!-- Current Playing Warning -->
       <div class="current-playing-warning" *ngIf="audioService.getIsPlaying() && !isCurrentlyPlayingFrequency">
         <ion-card class="warning-card">
           <ion-card-content>
-            <div class="playing-info">
-              <div class="playing-text">
-                <h4>🎵 Reproduciendo: {{audioService.getCurrentSoundInfo()}}</h4>
-                <p>Detén el sonido actual para usar el generador de frecuencias</p>
+            <div class="warning-content">
+              <div class="warning-info">
+                <div class="warning-icon">🎵</div>
+                <div class="warning-text">
+                  <h4>Reproduciendo: {{audioService.getCurrentSoundInfo()}}</h4>
+                  <p>Detén el sonido actual para usar el generador</p>
+                </div>
               </div>
-              <ion-button fill="clear" color="danger" (click)="stopCurrentSound()">
-                <ion-icon name="stop"></ion-icon>
+              <ion-button fill="clear" color="danger" (click)="stopCurrentSound()" class="stop-btn">
+                <ion-icon name="stop" slot="start"></ion-icon>
                 Detener
               </ion-button>
             </div>
@@ -41,252 +48,528 @@ import { AlertController } from '@ionic/angular';
         </ion-card>
       </div>
 
-      <ion-card class="frequency-card">
-        <ion-card-content>
-          <!-- Frequency Control -->
-          <ion-item lines="none" class="control-item">
-            <ion-label>
-              <h3>Frecuencia</h3>
-              <p>{{frequency}} Hz</p>
-            </ion-label>
-            <ion-range 
-              [(ngModel)]="frequency"
-              [min]="20" 
-              [max]="20000" 
-              [pin]="true" 
-              [snaps]="false"
-              class="frequency-range"
-              color="primary">
-            </ion-range>
-          </ion-item>
+      <!-- Main Control Card -->
+      <div class="main-container">
+        <ion-card class="frequency-card">
+          <ion-card-content>
+            
+            <!-- Header Section -->
+            <div class="card-header">
+              <div class="header-info">
+                <h2>Terapia de Frecuencias</h2>
+                <p>Crea tu experiencia sonora personalizada</p>
+              </div>
+              <div class="frequency-display">
+                <span class="freq-number">{{frequency}}</span>
+                <span class="freq-unit">Hz</span>
+              </div>
+            </div>
 
-          <!-- Duration Control -->
-          <ion-item lines="none" class="control-item">
-            <ion-label>
-              <h3>Duración</h3>
-              <p>{{duration}} minuto{{duration !== 1 ? 's' : ''}}</p>
-            </ion-label>
-            <ion-range 
-              [(ngModel)]="duration"
-              [min]="1" 
-              [max]="60" 
-              [pin]="true"
-              color="secondary">
-            </ion-range>
-          </ion-item>
+            <!-- Controls Grid -->
+            <ion-grid class="controls-grid">
+              
+              <!-- Frequency Control -->
+              <ion-row>
+                <ion-col size="12">
+                  <div class="control-section">
+                    <div class="control-header">
+                      <ion-icon name="pulse"></ion-icon>
+                      <h3>Frecuencia</h3>
+                      <ion-chip color="primary" size="small">
+                        <ion-label>{{getFrequencyNote(frequency)}}</ion-label>
+                      </ion-chip>
+                    </div>
+                    <ion-range 
+                      [(ngModel)]="frequency"
+                      [min]="20" 
+                      [max]="20000" 
+                      [pin]="true" 
+                      [snaps]="false"
+                      class="frequency-range"
+                      color="primary">
+                    </ion-range>
+                    <div class="range-labels">
+                      <span>20 Hz</span>
+                      <span>20,000 Hz</span>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
 
-          <!-- Volume Control -->
-          <ion-item lines="none" class="control-item">
-            <ion-label>
-              <h3>Volumen</h3>
-              <p>{{volume}}%</p>
-            </ion-label>
-            <ion-range 
-              [(ngModel)]="volume"
-              [min]="0" 
-              [max]="100" 
-              [pin]="true"
-              color="tertiary">
-            </ion-range>
-          </ion-item>
+              <!-- Duration and Volume -->
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="control-section">
+                    <div class="control-header">
+                      <ion-icon name="time"></ion-icon>
+                      <h3>Duración</h3>
+                      <ion-chip color="secondary" size="small">
+                        <ion-label>{{duration}} min</ion-label>
+                      </ion-chip>
+                    </div>
+                    <ion-range 
+                      [(ngModel)]="duration"
+                      [min]="1" 
+                      [max]="60" 
+                      [pin]="true"
+                      color="secondary">
+                    </ion-range>
+                    <div class="range-labels">
+                      <span>1 min</span>
+                      <span>60 min</span>
+                    </div>
+                  </div>
+                </ion-col>
 
-          <!-- Waveform Type Control -->
-          <div class="timbre-section">
-            <ion-text>
-              <h3>Timbre</h3>
-            </ion-text>
-            <div class="waveform-buttons">
-              <ion-button 
-                *ngFor="let type of waveformTypes"
-                [fill]="selectedWaveform === type.value ? 'solid' : 'outline'"
-                [color]="selectedWaveform === type.value ? 'primary' : 'medium'"
-                size="small"
-                class="waveform-btn"
-                (click)="selectWaveform(type.value)">
-                {{type.label}}
+                <ion-col size="12" size-md="6">
+                  <div class="control-section">
+                    <div class="control-header">
+                      <ion-icon name="volume-high"></ion-icon>
+                      <h3>Volumen</h3>
+                      <ion-chip color="tertiary" size="small">
+                        <ion-label>{{volume}}%</ion-label>
+                      </ion-chip>
+                    </div>
+                    <ion-range 
+                      [(ngModel)]="volume"
+                      [min]="10" 
+                      [max]="100" 
+                      [pin]="true"
+                      color="tertiary">
+                    </ion-range>
+                    <div class="range-labels">
+                      <span>10%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+            </ion-grid>
+
+            <!-- Waveform Selection -->
+            <div class="waveform-section">
+              <div class="section-header">
+                <ion-icon name="musical-notes"></ion-icon>
+                <h3>Forma de Onda</h3>
+              </div>
+              <div class="waveform-grid">
+                <ion-button 
+                  *ngFor="let type of waveformTypes"
+                  [fill]="selectedWaveform === type.value ? 'solid' : 'outline'"
+                  [color]="selectedWaveform === type.value ? 'primary' : 'medium'"
+                  class="waveform-btn"
+                  (click)="selectWaveform(type.value)">
+                  <div class="waveform-content">
+                    <span class="waveform-symbol">{{type.symbol}}</span>
+                    <span class="waveform-name">{{type.label}}</span>
+                  </div>
+                </ion-button>
+              </div>
+            </div>
+
+            <!-- Waveform Visualizer -->
+            <div class="visualizer-section">
+              <app-waveform-visualizer
+                [frequency]="frequency"
+                [waveformType]="selectedWaveform"
+                [isPlaying]="isCurrentlyPlayingFrequency">
+              </app-waveform-visualizer>
+            </div>
+
+            <!-- Main Control Button -->
+            <div class="main-controls">
+              <ion-button
+                expand="block"
+                [color]="isCurrentlyPlayingFrequency ? 'danger' : 'primary'"
+                class="main-control-btn"
+                (click)="togglePlayback()">
+                <ion-icon [name]="isCurrentlyPlayingFrequency ? 'stop' : 'play'" slot="start"></ion-icon>
+                <span>{{isCurrentlyPlayingFrequency ? 'Detener Frecuencia' : 'Reproducir Frecuencia'}}</span>
               </ion-button>
             </div>
-          </div>
 
-          <!-- Waveform Visualizer -->
-          <app-waveform-visualizer
-            [frequency]="frequency"
-            [waveformType]="selectedWaveform"
-            [isPlaying]="isCurrentlyPlayingFrequency">
-          </app-waveform-visualizer>
+            <!-- Current Status -->
+            <div class="status-info" *ngIf="isCurrentlyPlayingFrequency">
+              <div class="status-content">
+                <div class="status-item">
+                  <ion-icon name="pulse" color="success"></ion-icon>
+                  <span>{{frequency}} Hz - {{selectedWaveformLabel}}</span>
+                </div>
+                <div class="status-item">
+                  <ion-icon name="volume-high" color="success"></ion-icon>
+                  <span>{{volume}}% volumen</span>
+                </div>
+                <div class="status-item">
+                  <ion-icon name="time" color="success"></ion-icon>
+                  <span>{{duration}} minuto(s)</span>
+                </div>
+              </div>
+            </div>
 
-          <!-- Control Buttons -->
-          <div class="control-buttons">
-            <ion-button
-              expand="block"
-              [color]="isCurrentlyPlayingFrequency ? 'danger' : 'primary'"
-              class="play-button"
-              (click)="togglePlayback()">
-              <ion-icon [name]="isCurrentlyPlayingFrequency ? 'stop' : 'play'" slot="start"></ion-icon>
-              {{isCurrentlyPlayingFrequency ? 'Detener' : 'Reproducir Frecuencia'}}
-            </ion-button>
-          </div>
+          </ion-card-content>
+        </ion-card>
 
-          <!-- Sound Info -->
-          <div class="sound-info" *ngIf="isCurrentlyPlayingFrequency">
-            <ion-text color="primary">
-              <p><strong>Reproduciendo:</strong> {{frequency}} Hz - {{selectedWaveformLabel}} - {{volume}}% volumen</p>
-              <p><strong>Duración:</strong> {{duration}} minuto(s)</p>
-            </ion-text>
-          </div>
-        </ion-card-content>
-      </ion-card>
+        <!-- Quick Presets -->
+        <ion-card class="presets-card">
+          <ion-card-content>
+            <div class="presets-header">
+              <h3>Frecuencias Populares</h3>
+              <p>Configuraciones comunes para terapia de sonido</p>
+            </div>
+            <div class="presets-grid">
+              <div class="preset-item" *ngFor="let preset of frequencyPresets" (click)="applyPreset(preset)">
+                <div class="preset-info">
+                  <span class="preset-freq">{{preset.frequency}} Hz</span>
+                  <span class="preset-name">{{preset.name}}</span>
+                </div>
+                <div class="preset-benefit">{{preset.benefit}}</div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
     </ion-content>
   `,
   styles: [`
-    ion-toolbar {
-      --background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      --color: #ffffff;
+    .modern-header {
+      ion-toolbar {
+        --background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-primary-light) 100%);
+        --color: white;
+        height: 64px;
+        box-shadow: 0 4px 20px rgba(107, 70, 193, 0.3);
+      }
     }
 
-    ion-title {
+    .title-container {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       font-weight: 600;
     }
 
+    .title-icon {
+      font-size: 24px;
+    }
+
+    .frequency-content {
+      --background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 0;
+    }
+
     .current-playing-warning {
-      margin-bottom: 20px;
+      padding: 20px 20px 0;
     }
 
     .warning-card {
       background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
       border-radius: 16px;
-      border: 2px solid #f59e0b;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+      border: 2px solid var(--app-warning);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
     }
 
-    .playing-info {
+    .warning-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
     }
 
-    .playing-text h4 {
+    .warning-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .warning-icon {
+      font-size: 24px;
+    }
+
+    .warning-text h4 {
       margin: 0 0 4px 0;
       font-weight: 600;
       color: #92400e;
       font-size: 16px;
     }
 
-    .playing-text p {
+    .warning-text p {
       margin: 0;
       color: #b45309;
       font-size: 14px;
     }
 
+    .main-container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
     .frequency-card {
-      max-width: 800px;
-      margin: 16px auto;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
       background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
-      
-      @media (max-width: 768px) {
-        margin: 16px;
-        border-radius: 16px;
-      }
-    }
-
-    .control-item {
-      --padding-start: 0;
-      --padding-end: 0;
+      border: 1px solid rgba(107, 70, 193, 0.1);
       margin-bottom: 24px;
-      
-      ion-label h3 {
-        color: #1a1a2e;
-        font-weight: 600;
-        margin: 0 0 4px 0;
-        font-size: 18px;
-      }
-      
-      ion-label p {
-        color: #666;
-        margin: 0;
-        font-size: 14px;
-        font-weight: 500;
-      }
     }
 
-    .frequency-range {
-      --bar-height: 8px;
-      --bar-border-radius: 4px;
-      --knob-size: 28px;
-      --bar-background: #e9ecef;
-      --bar-background-active: linear-gradient(135deg, #0077ff, #00bfff);
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid rgba(107, 70, 193, 0.1);
     }
 
-    .timbre-section {
-      margin: 32px 0 24px 0;
-      
-      h3 {
-        color: #1a1a2e;
-        font-weight: 600;
-        margin: 0 0 16px 0;
-        font-size: 18px;
-      }
+    .header-info h2 {
+      margin: 0 0 8px 0;
+      color: var(--app-primary);
+      font-weight: 700;
+      font-size: 24px;
     }
 
-    .waveform-buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    .header-info p {
+      margin: 0;
+      color: var(--app-text-medium);
+      font-size: 16px;
+    }
+
+    .frequency-display {
+      background: linear-gradient(135deg, var(--app-primary), var(--app-primary-light));
+      color: white;
+      padding: 16px 24px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(107, 70, 193, 0.3);
+    }
+
+    .freq-number {
+      font-size: 32px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .freq-unit {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .controls-grid {
+      margin: 0 -8px;
+    }
+
+    .control-section {
+      background: rgba(107, 70, 193, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(107, 70, 193, 0.1);
+    }
+
+    .control-header {
+      display: flex;
+      align-items: center;
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+    }
+
+    .control-header ion-icon {
+      font-size: 20px;
+      color: var(--app-primary);
+    }
+
+    .control-header h3 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--app-text);
+      flex: 1;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--app-text-medium);
+      margin-top: 8px;
+    }
+
+    .waveform-section {
+      margin: 32px 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-header ion-icon {
+      font-size: 24px;
+      color: var(--app-primary);
+    }
+
+    .section-header h3 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--app-text);
+    }
+
+    .waveform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
     }
 
     .waveform-btn {
-      --border-radius: 12px;
-      height: 44px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .control-buttons {
-      margin: 32px 0 16px 0;
-    }
-
-    .play-button {
-      height: 56px;
-      font-size: 18px;
-      font-weight: 600;
+      height: 64px;
       --border-radius: 16px;
-      --box-shadow: 0 4px 20px rgba(0,119,255,0.3);
+      --border-width: 2px;
+      font-weight: 600;
     }
 
-    .sound-info {
-      background: rgba(0,119,255,0.05);
+    .waveform-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .waveform-symbol {
+      font-size: 18px;
+    }
+
+    .waveform-name {
+      font-size: 12px;
+    }
+
+    .visualizer-section {
+      margin: 32px 0;
+    }
+
+    .main-controls {
+      margin: 32px 0 24px;
+    }
+
+    .main-control-btn {
+      height: 64px;
+      font-size: 18px;
+      font-weight: 700;
+      --border-radius: 20px;
+      --box-shadow: 0 6px 30px rgba(107, 70, 193, 0.4);
+    }
+
+    .status-info {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      color: var(--app-text);
+    }
+
+    .presets-card {
+      border-radius: 20px;
+      background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .presets-header h3 {
+      margin: 0 0 8px 0;
+      color: var(--app-primary);
+      font-weight: 600;
+    }
+
+    .presets-header p {
+      margin: 0 0 20px 0;
+      color: var(--app-text-medium);
+      font-size: 14px;
+    }
+
+    .presets-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .preset-item {
+      background: white;
       border-radius: 12px;
       padding: 16px;
-      margin-top: 16px;
-      border: 1px solid rgba(0,119,255,0.1);
-      
-      p {
-        margin: 4px 0;
-        font-size: 14px;
-      }
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid rgba(107, 70, 193, 0.1);
     }
 
-    @media (max-width: 600px) {
-      .waveform-buttons {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-      }
-      
-      .waveform-btn {
-        font-size: 12px;
-        height: 40px;
+    .preset-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(107, 70, 193, 0.2);
+      border-color: var(--app-primary);
+    }
+
+    .preset-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .preset-freq {
+      font-weight: 700;
+      color: var(--app-primary);
+      font-size: 16px;
+    }
+
+    .preset-name {
+      font-weight: 600;
+      color: var(--app-text);
+    }
+
+    .preset-benefit {
+      font-size: 14px;
+      color: var(--app-text-medium);
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 16px;
       }
 
-      .playing-info {
+      .card-header {
         flex-direction: column;
-        align-items: flex-start;
+        text-align: center;
+        gap: 16px;
+      }
+
+      .frequency-display {
+        order: -1;
+      }
+
+      .waveform-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .status-content {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .warning-content {
+        flex-direction: column;
+        text-align: center;
         gap: 12px;
       }
     }
@@ -298,43 +581,73 @@ import { AlertController } from '@ionic/angular';
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonRange, IonItem, IonLabel, IonButton, IonCard, 
     IonCardContent, IonSegment, IonSegmentButton, 
-    IonIcon, IonText,
+    IonIcon, IonText, IonGrid, IonRow, IonCol, IonChip,
     WaveformVisualizerComponent
   ]
 })
 export class ManualFrequenciesPage implements OnDestroy {
   frequency: number = 440;
   duration: number = 5;
-  volume: number = 50;
+  volume: number = 30; // Volumen más bajo por defecto
   selectedWaveform: WaveformType = 'sine';
   isCurrentlyPlayingFrequency: boolean = false;
 
   waveformTypes = [
-    { value: 'sine' as WaveformType, label: 'Senoidal' },
-    { value: 'square' as WaveformType, label: 'Cuadrada' },
-    { value: 'triangle' as WaveformType, label: 'Triangular' },
-    { value: 'sawtooth' as WaveformType, label: 'Diente de Sierra' }
+    { value: 'sine' as WaveformType, label: 'Senoidal', symbol: '∿' },
+    { value: 'square' as WaveformType, label: 'Cuadrada', symbol: '⊓' },
+    { value: 'triangle' as WaveformType, label: 'Triangular', symbol: '△' },
+    { value: 'sawtooth' as WaveformType, label: 'Sierra', symbol: '⩙' }
+  ];
+
+  frequencyPresets = [
+    { frequency: 174, name: 'Dolor', benefit: 'Alivio del dolor físico' },
+    { frequency: 285, name: 'Sanación', benefit: 'Regeneración de tejidos' },
+    { frequency: 396, name: 'Liberación', benefit: 'Libera miedo y culpa' },
+    { frequency: 417, name: 'Cambio', benefit: 'Facilita el cambio' },
+    { frequency: 432, name: 'Armonía', benefit: 'Frecuencia natural' },
+    { frequency: 528, name: 'Amor', benefit: 'Transformación y ADN' },
+    { frequency: 639, name: 'Conexión', benefit: 'Relaciones armoniosas' },
+    { frequency: 741, name: 'Expresión', benefit: 'Expresión y creatividad' },
+    { frequency: 852, name: 'Intuición', benefit: 'Despertar espiritual' },
+    { frequency: 963, name: 'Corona', benefit: 'Conexión divina' }
   ];
 
   constructor(
     public audioService: AudioService,
     private alertController: AlertController
   ) {
-    addIcons({ play, stop, pulse });
+    addIcons({ play, stop, pulse, musicalNotes, volumeHigh, time });
   }
 
   get selectedWaveformLabel(): string {
     return this.waveformTypes.find(type => type.value === this.selectedWaveform)?.label || 'Senoidal';
   }
 
+  getFrequencyNote(freq: number): string {
+    if (freq < 100) return 'Sub Bass';
+    if (freq < 250) return 'Bass';
+    if (freq < 500) return 'Low Mid';
+    if (freq < 2000) return 'Mid Range';
+    if (freq < 4000) return 'High Mid';
+    if (freq < 8000) return 'Presence';
+    return 'Brilliance';
+  }
+
   selectWaveform(waveform: WaveformType) {
     this.selectedWaveform = waveform;
     
-    // If currently playing frequency, restart with new waveform
     if (this.isCurrentlyPlayingFrequency) {
       this.stopPlayback();
       setTimeout(() => this.startPlayback(), 100);
     }
+  }
+
+  applyPreset(preset: any) {
+    this.frequency = preset.frequency;
+    // Aplicar configuración óptima para frecuencias curativas
+    this.volume = 25; // Volumen más suave para frecuencias curativas
+    this.duration = 10; // Duración estándar
+    this.selectedWaveform = 'sine'; // Onda senoidal es mejor para terapia
   }
 
   async togglePlayback() {
@@ -357,11 +670,10 @@ export class ManualFrequenciesPage implements OnDestroy {
         this.duration,
         this.volume,
         this.selectedWaveform,
-        false // Don't force, show conflict if needed
+        false
       );
       this.isCurrentlyPlayingFrequency = true;
       
-      // Set timeout to update UI when sound stops
       setTimeout(() => {
         if (!this.audioService.getIsPlaying()) {
           this.isCurrentlyPlayingFrequency = false;
@@ -391,7 +703,6 @@ export class ManualFrequenciesPage implements OnDestroy {
         {
           text: 'Detener y Reproducir',
           handler: () => {
-            // Force stop and retry with force
             this.forceStartPlayback();
           }
         }
@@ -407,7 +718,7 @@ export class ManualFrequenciesPage implements OnDestroy {
         this.duration,
         this.volume,
         this.selectedWaveform,
-        true // Force override
+        true
       );
       this.isCurrentlyPlayingFrequency = true;
       

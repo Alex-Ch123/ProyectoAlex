@@ -1,3 +1,4 @@
+//hola
 import { Component } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, 
          IonCardTitle, IonCardContent, IonIcon } from '@ionic/angular/standalone';

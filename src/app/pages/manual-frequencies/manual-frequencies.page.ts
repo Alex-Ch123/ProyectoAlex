@@ -8,6 +8,7 @@ import { addIcons } from 'ionicons';
 import { play, stop, pulse } from 'ionicons/icons';
 import { AudioService, WaveformType } from '../../services/audio.service';
 import { WaveformVisualizerComponent } from '../../components/waveform-visualizer/waveform-visualizer.component';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-manual-frequencies',
@@ -22,6 +23,24 @@ import { WaveformVisualizerComponent } from '../../components/waveform-visualize
     </ion-header>
 
     <ion-content class="ion-padding">
+      <!-- Current Playing Warning -->
+      <div class="current-playing-warning" *ngIf="audioService.getIsPlaying() && !isCurrentlyPlayingFrequency">
+        <ion-card class="warning-card">
+          <ion-card-content>
+            <div class="playing-info">
+              <div class="playing-text">
+                <h4>🎵 Reproduciendo: {{audioService.getCurrentSoundInfo()}}</h4>
+                <p>Detén el sonido actual para usar el generador de frecuencias</p>
+              </div>
+              <ion-button fill="clear" color="danger" (click)="stopCurrentSound()">
+                <ion-icon name="stop"></ion-icon>
+                Detener
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
       <ion-card class="frequency-card">
         <ion-card-content>
           <!-- Frequency Control -->
@@ -93,23 +112,23 @@ import { WaveformVisualizerComponent } from '../../components/waveform-visualize
           <app-waveform-visualizer
             [frequency]="frequency"
             [waveformType]="selectedWaveform"
-            [isPlaying]="isPlaying">
+            [isPlaying]="isCurrentlyPlayingFrequency">
           </app-waveform-visualizer>
 
           <!-- Control Buttons -->
           <div class="control-buttons">
             <ion-button
               expand="block"
-              [color]="isPlaying ? 'danger' : 'primary'"
+              [color]="isCurrentlyPlayingFrequency ? 'danger' : 'primary'"
               class="play-button"
               (click)="togglePlayback()">
-              <ion-icon [name]="isPlaying ? 'stop' : 'play'" slot="start"></ion-icon>
-              {{isPlaying ? 'Detener' : 'Reproducir Frecuencia'}}
+              <ion-icon [name]="isCurrentlyPlayingFrequency ? 'stop' : 'play'" slot="start"></ion-icon>
+              {{isCurrentlyPlayingFrequency ? 'Detener' : 'Reproducir Frecuencia'}}
             </ion-button>
           </div>
 
           <!-- Sound Info -->
-          <div class="sound-info" *ngIf="isPlaying">
+          <div class="sound-info" *ngIf="isCurrentlyPlayingFrequency">
             <ion-text color="primary">
               <p><strong>Reproduciendo:</strong> {{frequency}} Hz - {{selectedWaveformLabel}} - {{volume}}% volumen</p>
               <p><strong>Duración:</strong> {{duration}} minuto(s)</p>
@@ -130,6 +149,36 @@ import { WaveformVisualizerComponent } from '../../components/waveform-visualize
       align-items: center;
       gap: 8px;
       font-weight: 600;
+    }
+
+    .current-playing-warning {
+      margin-bottom: 20px;
+    }
+
+    .warning-card {
+      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+      border-radius: 16px;
+      border: 2px solid #f59e0b;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .playing-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .playing-text h4 {
+      margin: 0 0 4px 0;
+      font-weight: 600;
+      color: #92400e;
+      font-size: 16px;
+    }
+
+    .playing-text p {
+      margin: 0;
+      color: #b45309;
+      font-size: 14px;
     }
 
     .frequency-card {
@@ -234,6 +283,12 @@ import { WaveformVisualizerComponent } from '../../components/waveform-visualize
         font-size: 12px;
         height: 40px;
       }
+
+      .playing-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
     }
   `],
   standalone: true,
@@ -252,7 +307,7 @@ export class ManualFrequenciesPage implements OnDestroy {
   duration: number = 5;
   volume: number = 50;
   selectedWaveform: WaveformType = 'sine';
-  isPlaying: boolean = false;
+  isCurrentlyPlayingFrequency: boolean = false;
 
   waveformTypes = [
     { value: 'sine' as WaveformType, label: 'Senoidal' },
@@ -261,7 +316,10 @@ export class ManualFrequenciesPage implements OnDestroy {
     { value: 'sawtooth' as WaveformType, label: 'Diente de Sierra' }
   ];
 
-  constructor(private audioService: AudioService) {
+  constructor(
+    public audioService: AudioService,
+    private alertController: AlertController
+  ) {
     addIcons({ play, stop, pulse });
   }
 
@@ -272,19 +330,24 @@ export class ManualFrequenciesPage implements OnDestroy {
   selectWaveform(waveform: WaveformType) {
     this.selectedWaveform = waveform;
     
-    // If currently playing, restart with new waveform
-    if (this.isPlaying) {
+    // If currently playing frequency, restart with new waveform
+    if (this.isCurrentlyPlayingFrequency) {
       this.stopPlayback();
       setTimeout(() => this.startPlayback(), 100);
     }
   }
 
   async togglePlayback() {
-    if (this.isPlaying) {
+    if (this.isCurrentlyPlayingFrequency) {
       this.stopPlayback();
     } else {
       await this.startPlayback();
     }
+  }
+
+  stopCurrentSound() {
+    this.audioService.stopSound();
+    this.isCurrentlyPlayingFrequency = false;
   }
 
   private async startPlayback() {
@@ -293,29 +356,75 @@ export class ManualFrequenciesPage implements OnDestroy {
         this.frequency,
         this.duration,
         this.volume,
-        this.selectedWaveform
+        this.selectedWaveform,
+        false // Don't force, show conflict if needed
       );
-      this.isPlaying = true;
+      this.isCurrentlyPlayingFrequency = true;
       
       // Set timeout to update UI when sound stops
       setTimeout(() => {
         if (!this.audioService.getIsPlaying()) {
-          this.isPlaying = false;
+          this.isCurrentlyPlayingFrequency = false;
         }
       }, this.duration * 60 * 1000);
       
     } catch (error) {
       console.error('Error playing frequency:', error);
-      alert('Error al reproducir el sonido. Asegúrate de que tu navegador permita la reproducción de audio.');
+      this.showSoundConflictAlert(error as Error);
     }
   }
 
   private stopPlayback() {
     this.audioService.stopSound();
-    this.isPlaying = false;
+    this.isCurrentlyPlayingFrequency = false;
+  }
+
+  private async showSoundConflictAlert(error: Error) {
+    const alert = await this.alertController.create({
+      header: 'Sonido en Uso',
+      message: error.message,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Detener y Reproducir',
+          handler: () => {
+            // Force stop and retry with force
+            this.forceStartPlayback();
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async forceStartPlayback() {
+    try {
+      await this.audioService.playFrequency(
+        this.frequency,
+        this.duration,
+        this.volume,
+        this.selectedWaveform,
+        true // Force override
+      );
+      this.isCurrentlyPlayingFrequency = true;
+      
+      setTimeout(() => {
+        if (!this.audioService.getIsPlaying()) {
+          this.isCurrentlyPlayingFrequency = false;
+        }
+      }, this.duration * 60 * 1000);
+      
+    } catch (error) {
+      console.error('Error force playing frequency:', error);
+    }
   }
 
   ngOnDestroy() {
-    this.stopPlayback();
+    if (this.isCurrentlyPlayingFrequency) {
+      this.stopPlayback();
+    }
   }
 }

@@ -1,22 +1,127 @@
-// For information on how to create your own theme, please see:
+// Ionic Variables and Theming
+// For more info, please see:
 // http://ionicframework.com/docs/theming/
 
 :root {
+  // Enhanced Sound Therapy Color Palette
   --app-primary: #6b46c1;
+  --app-primary-light: #8b5cf6;
+  --app-primary-dark: #553c9a;
   --app-secondary: #9f7aea;
-  --app-background: #0a0a0a;
-  --app-surface: #1a1a1a;
-  --app-surface-light: #2d2d2d;
-  --app-text: #ffffff;
-  --app-text-medium: rgba(255, 255, 255, 0.8);
-  --app-text-light: rgba(255, 255, 255, 0.6);
+  --app-secondary-light: #b794f6;
+  --app-tertiary: #059669;
+  --app-tertiary-light: #10b981;
+  
+  // Background colors
+  --app-background: #f8fafc;
+  --app-surface: #ffffff;
+  --app-surface-light: #f1f5f9;
+  --app-surface-dark: #e2e8f0;
+  
+  // Text colors
+  --app-text: #1f2937;
+  --app-text-medium: #6b7280;
+  --app-text-light: #9ca3af;
+  
+  // Accent colors for different times/moods
+  --app-morning: #f59e0b;
+  --app-morning-light: #fbbf24;
+  --app-evening: #6366f1;
+  --app-evening-light: #8b5cf6;
+  --app-night: #4f46e5;
+  --app-night-light: #6366f1;
+  
+  // Status colors
+  --app-success: #10b981;
+  --app-warning: #f59e0b;
+  --app-danger: #ef4444;
+  --app-info: #3b82f6;
 
+  // Ionic Color Overrides
   --ion-color-primary: var(--app-primary);
   --ion-color-primary-rgb: 107, 70, 193;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: var(--app-primary-dark);
+  --ion-color-primary-tint: var(--app-primary-light);
+
+  --ion-color-secondary: var(--app-secondary);
+  --ion-color-secondary-rgb: 159, 122, 234;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #8a6bc7;
+  --ion-color-secondary-tint: var(--app-secondary-light);
+
+  --ion-color-tertiary: var(--app-tertiary);
+  --ion-color-tertiary-rgb: 5, 150, 105;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #048a5c;
+  --ion-color-tertiary-tint: var(--app-tertiary-light);
+
+  --ion-color-success: var(--app-success);
+  --ion-color-success-rgb: 16, 185, 129;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #0e9b6e;
+  --ion-color-success-tint: #22c55e;
+
+  --ion-color-warning: var(--app-warning);
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #d97706;
+  --ion-color-warning-tint: var(--app-morning-light);
+
+  --ion-color-danger: var(--app-danger);
+  --ion-color-danger-rgb: 239, 68, 68;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #dc2626;
+  --ion-color-danger-tint: #f87171;
+
+  --ion-color-medium: var(--app-text-medium);
+  --ion-color-medium-rgb: 107, 114, 128;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #374151;
+  --ion-color-medium-tint: var(--app-text-light);
+
+  --ion-color-light: var(--app-surface-light);
+  --ion-color-light-rgb: 241, 245, 249;
+  --ion-color-light-contrast: var(--app-text);
+  --ion-color-light-contrast-rgb: 31, 41, 55;
+  --ion-color-light-shade: var(--app-surface-dark);
+  --ion-color-light-tint: #f8fafc;
+
+  // Background and surface
   --ion-background-color: var(--app-background);
   --ion-text-color: var(--app-text);
-
-  --ion-tab-bar-background: var(--app-surface);
   --ion-toolbar-background: var(--app-surface);
+  --ion-tab-bar-background: var(--app-surface);
   --ion-card-background: var(--app-surface);
+
+  // Component specific
+  --ion-item-background: transparent;
+  --ion-item-color: var(--app-text);
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-background: #0f172a;
+    --app-surface: #1e293b;
+    --app-surface-light: #334155;
+    --app-surface-dark: #475569;
+    
+    --app-text: #f8fafc;
+    --app-text-medium: #cbd5e1;
+    --app-text-light: #94a3b8;
+
+    --ion-background-color: var(--app-background);
+    --ion-text-color: var(--app-text);
+    --ion-toolbar-background: var(--app-surface);
+    --ion-tab-bar-background: var(--app-surface);
+    --ion-card-background: var(--app-surface);
+  }
 }

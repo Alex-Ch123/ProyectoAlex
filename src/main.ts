@@ -9,7 +9,9 @@ import { IonicModule } from '@ionic/angular';
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideIonicAngular(),
+    provideIonicAngular({
+      innerHTMLTemplatesEnabled: true
+    }),
     provideRouter(routes),
     importProvidersFrom(IonicModule.forRoot({}))
   ],

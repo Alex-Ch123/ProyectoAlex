@@ -40,12 +40,19 @@ import { CommonModule } from '@angular/common';
               fill="outline"
               placeholder="••••••••"
             ></ion-input>
+
             <ion-button
               expand="block"
               type="submit"
               [disabled]="registerForm.invalid"
               class="register-boton"
             >Registrarse</ion-button>
+
+            <!-- Mensaje de error visible si falla el registro -->
+            <div *ngIf="loginError" class="login-error">
+              Error al registrar usuario, intenta de nuevo.
+            </div>
+
             <div class="login-link">
               ¿Ya tienes cuenta? <a routerLink="/login">Iniciar sesión</a>
             </div>
@@ -98,11 +105,17 @@ import { CommonModule } from '@angular/common';
       text-align: center;
       margin-top: 24px;
       color: #666;
-      a {
-        color: #0077ff;
-        text-decoration: none;
-        font-weight: 500;
-      }
+    }
+    .login-link a {
+      color: #0077ff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .login-error {
+      color: #ff3b30;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 14px;
     }
   `],
   standalone: true,
@@ -120,7 +133,7 @@ import { CommonModule } from '@angular/common';
 })
 export class RegisterPage {
   registerForm: FormGroup;
-  loginError = false; // Agregar esta propiedad
+  loginError = false;
 
   constructor(
     private fb: FormBuilder,

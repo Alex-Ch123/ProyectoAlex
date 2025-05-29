@@ -92,11 +92,11 @@ import { CommonModule } from '@angular/common';
       text-align: center;
       margin-top: 24px;
       color: #666;
-      a {
-        color: #0077ff;
-        text-decoration: none;
-        font-weight: 500;
-      }
+    }
+    .register-link a {
+      color: #0077ff;
+      text-decoration: none;
+      font-weight: 500;
     }
     .login-error {
       color: #ff3b30;
@@ -138,10 +138,9 @@ export class LoginPage {
       try {
         const { email, password } = this.loginForm.value;
         console.log('Iniciando sesión con:', { email, password });
-        
-        // Simular login exitoso
-        const success = true;
-        
+
+        const success = await this.authService.login(email, password);
+
         if (success) {
           console.log('Login exitoso');
           await this.router.navigate(['/tabs/home']);

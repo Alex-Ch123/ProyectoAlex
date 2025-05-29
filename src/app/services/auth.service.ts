@@ -11,7 +11,6 @@ export interface User {
   providedIn: 'root'
 })
 export class AuthService {
-  // Usuario de prueba predefinido
   private defaultUser: User = {
     email: 'test@test.com',
     password: '123456',
@@ -20,7 +19,7 @@ export class AuthService {
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser = this.currentUserSubject.asObservable();
-  private users: User[] = [this.defaultUser]; // Inicializar con usuario de prueba
+  private users: User[] = [this.defaultUser]; // Usuarios en memoria
 
   async login(email: string, password: string): Promise<boolean> {
     console.log('Intento de login:', { email, password });
@@ -36,7 +35,14 @@ export class AuthService {
 
   async register(userData: {email: string, password: string, name: string}): Promise<boolean> {
     console.log('Intento de registro:', userData);
-    // Agregar nuevo usuario
+
+    // Revisa si ya existe el email
+    const exists = this.users.some(u => u.email === userData.email);
+    if (exists) {
+      console.log('Registro fallido: email ya registrado');
+      return false;  // No permitir duplicados
+    }
+
     this.users.push(userData);
     this.currentUserSubject.next(userData);
     console.log('Usuarios registrados:', this.users);

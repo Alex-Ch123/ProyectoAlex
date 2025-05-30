@@ -15,6 +15,7 @@ export class AudioService {
   private isPlaying = false;
   private currentTimeout: any = null;
   private currentSoundInfo: string = '';
+  private currentSoundSource: 'frequency' | 'file' | 'routine' = 'frequency';
 
   // Sound file paths - Updated to correct path
   private soundFiles = {
@@ -46,6 +47,10 @@ export class AudioService {
 
   getCurrentSoundInfo(): string {
     return this.currentSoundInfo;
+  }
+
+  getCurrentSoundSource(): 'frequency' | 'file' | 'routine' {
+    return this.currentSoundSource;
   }
 
   // Force stop any currently playing sound
@@ -102,7 +107,19 @@ export class AudioService {
 
     this.isPlaying = false;
     this.currentSoundInfo = '';
+    this.currentSoundSource = 'frequency';
     console.log('All audio stopped successfully');
+  }
+
+  // Check if we can play (for conflict resolution)
+  canPlay(force: boolean = false): boolean {
+    return !this.isPlaying || force;
+  }
+
+  // Get conflict message for UI
+  getConflictMessage(): string {
+    if (!this.isPlaying) return '';
+    return `Ya hay un sonido reproduciéndose: ${this.currentSoundInfo}. Detén el sonido actual antes de reproducir otro.`;
   }
 
   // Play sound files (MP3)
@@ -115,7 +132,7 @@ export class AudioService {
     
     // Check if another sound is playing (unless forced)
     if (this.isPlaying && !force) {
-      throw new Error(`Ya hay un sonido reproduciéndose: ${this.currentSoundInfo}. Detén el sonido actual antes de reproducir otro.`);
+      throw new Error(this.getConflictMessage());
     }
 
     // Stop any current sound first
@@ -150,6 +167,7 @@ export class AudioService {
 
       // Set current sound info
       this.currentSoundInfo = this.getSoundDisplayName(soundType);
+      this.currentSoundSource = 'file';
 
       // Test if file can be loaded
       await new Promise((resolve, reject) => {
@@ -197,7 +215,7 @@ export class AudioService {
     
     // Check if another sound is playing (unless forced)
     if (this.isPlaying && !force) {
-      throw new Error(`Ya hay un sonido reproduciéndose: ${this.currentSoundInfo}. Detén el sonido actual antes de reproducir otro.`);
+      throw new Error(this.getConflictMessage());
     }
 
     // Stop any current sound first
@@ -234,6 +252,7 @@ export class AudioService {
 
       // Set current sound info
       this.currentSoundInfo = `${frequency}Hz - ${waveform}`;
+      this.currentSoundSource = 'frequency';
 
       // Start playing
       this.oscillator.start();
@@ -265,6 +284,9 @@ export class AudioService {
   ): Promise<void> {
     console.log(`Attempting to play routine sound: ${soundType}`);
     
+    // Set source as routine
+    this.currentSoundSource = 'routine';
+    
     try {
       switch (soundType) {
         case 'morning':
@@ -294,6 +316,10 @@ export class AudioService {
           // Default to nature sound
           await this.playSoundFile('nature', duration, volume, force);
       }
+      
+      // Update source after successful play
+      this.currentSoundSource = 'routine';
+      
     } catch (error) {
       console.error('Error playing routine sound:', error);
       throw error;
@@ -331,5 +357,17 @@ export class AudioService {
     const dataArray = new Uint8Array(bufferLength);
     this.analyser.getByteFrequencyData(dataArray);
     return dataArray;
+  }
+
+  // Utility method to check if a specific source is playing
+  isSourcePlaying(source: 'frequency' | 'file' | 'routine'): boolean {
+    return this.isPlaying && this.currentSoundSource === source;
+  }
+
+  // Get remaining time for current sound (if applicable)
+  getRemainingTime(): number {
+    // This would require tracking start time and duration
+    // For now, return 0 - could be enhanced later
+    return 0;
   }
 }

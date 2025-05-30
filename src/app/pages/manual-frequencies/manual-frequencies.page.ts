@@ -3,14 +3,15 @@ import { Component, OnDestroy } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonRange, 
          IonItem, IonLabel, IonButton, IonCard, IonCardContent,
          IonSegment, IonSegmentButton, IonIcon, IonText, IonGrid,
-         IonRow, IonCol, IonChip } from '@ionic/angular/standalone';
+         IonRow, IonCol, IonChip, IonToast } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { play, stop, pulse, musicalNotes, volumeHigh, time } from 'ionicons/icons';
+import { play, stop, pulse, musicalNotes, volumeHigh, time, heart, heartOutline } from 'ionicons/icons';
 import { AudioService, WaveformType } from '../../services/audio.service';
+import { FavoritesService } from '../../services/favorites.service';
 import { WaveformVisualizerComponent } from '../../components/waveform-visualizer/waveform-visualizer.component';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-manual-frequencies',
@@ -21,6 +22,15 @@ import { AlertController } from '@ionic/angular';
           <div class="title-container">
             <ion-icon name="pulse" class="title-icon"></ion-icon>
             <span class="title-text">Generador de Frecuencias</span>
+            <!-- Favorites Heart Icon -->
+            <ion-button 
+              fill="clear" 
+              size="small" 
+              class="favorite-btn"
+              (click)="toggleFavorite()"
+              [color]="isFavorited ? 'danger' : 'medium'">
+              <ion-icon [name]="isFavorited ? 'heart' : 'heart-outline'" slot="icon-only"></ion-icon>
+            </ion-button>
           </div>
         </ion-title>
       </ion-toolbar>
@@ -86,7 +96,8 @@ import { AlertController } from '@ionic/angular';
                       [pin]="true" 
                       [snaps]="false"
                       class="frequency-range"
-                      color="primary">
+                      color="primary"
+                      (ionInput)="onConfigurationChange()">
                     </ion-range>
                     <div class="range-labels">
                       <span>20 Hz</span>
@@ -112,7 +123,8 @@ import { AlertController } from '@ionic/angular';
                       [min]="1" 
                       [max]="60" 
                       [pin]="true"
-                      color="secondary">
+                      color="secondary"
+                      (ionInput)="onConfigurationChange()">
                     </ion-range>
                     <div class="range-labels">
                       <span>1 min</span>
@@ -135,7 +147,8 @@ import { AlertController } from '@ionic/angular';
                       [min]="10" 
                       [max]="100" 
                       [pin]="true"
-                      color="tertiary">
+                      color="tertiary"
+                      (ionInput)="onConfigurationChange()">
                     </ion-range>
                     <div class="range-labels">
                       <span>10%</span>
@@ -246,10 +259,40 @@ import { AlertController } from '@ionic/angular';
       align-items: center;
       gap: 12px;
       font-weight: 600;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .title-text {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .title-icon {
       font-size: 24px;
+    }
+
+    .favorite-btn {
+      --color: white;
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .favorite-btn[color="danger"] {
+      --color: #ff4757;
+      animation: heartBeat 0.6s ease-in-out;
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.3); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.3); }
+      70% { transform: scale(1); }
     }
 
     .frequency-content {
@@ -572,6 +615,12 @@ import { AlertController } from '@ionic/angular';
         text-align: center;
         gap: 12px;
       }
+
+      .title-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
     }
   `],
   standalone: true,
@@ -582,15 +631,16 @@ import { AlertController } from '@ionic/angular';
     IonRange, IonItem, IonLabel, IonButton, IonCard, 
     IonCardContent, IonSegment, IonSegmentButton, 
     IonIcon, IonText, IonGrid, IonRow, IonCol, IonChip,
-    WaveformVisualizerComponent
+    IonToast, WaveformVisualizerComponent
   ]
 })
 export class ManualFrequenciesPage implements OnDestroy {
   frequency: number = 440;
   duration: number = 5;
-  volume: number = 30; // Volumen más bajo por defecto
+  volume: number = 30;
   selectedWaveform: WaveformType = 'sine';
   isCurrentlyPlayingFrequency: boolean = false;
+  isFavorited: boolean = false;
 
   waveformTypes = [
     { value: 'sine' as WaveformType, label: 'Senoidal', symbol: '∿' },
@@ -614,9 +664,12 @@ export class ManualFrequenciesPage implements OnDestroy {
 
   constructor(
     public audioService: AudioService,
-    private alertController: AlertController
+    private favoritesService: FavoritesService,
+    private alertController: AlertController,
+    private toastController: ToastController
   ) {
-    addIcons({ play, stop, pulse, musicalNotes, volumeHigh, time });
+    addIcons({ play, stop, pulse, musicalNotes, volumeHigh, time, heart, heartOutline });
+    this.updateFavoriteStatus();
   }
 
   get selectedWaveformLabel(): string {
@@ -635,6 +688,7 @@ export class ManualFrequenciesPage implements OnDestroy {
 
   selectWaveform(waveform: WaveformType) {
     this.selectedWaveform = waveform;
+    this.updateFavoriteStatus();
     
     if (this.isCurrentlyPlayingFrequency) {
       this.stopPlayback();
@@ -642,12 +696,54 @@ export class ManualFrequenciesPage implements OnDestroy {
     }
   }
 
+  onConfigurationChange() {
+    this.updateFavoriteStatus();
+  }
+
+  updateFavoriteStatus() {
+    this.isFavorited = this.favoritesService.isFavorite(
+      this.frequency, 
+      this.selectedWaveform, 
+      this.duration, 
+      this.volume
+    );
+  }
+
+  async toggleFavorite() {
+    if (this.isFavorited) {
+      // Remove from favorites
+      const favorite = this.favoritesService.getFavoriteByConfig(
+        this.frequency, this.selectedWaveform, this.duration, this.volume
+      );
+      
+      if (favorite) {
+        const success = this.favoritesService.removeFavorite(favorite.id);
+        if (success) {
+          this.isFavorited = false;
+          await this.showToast('Eliminado de favoritos', 'danger');
+        }
+      }
+    } else {
+      // Add to favorites
+      try {
+        const favorite = this.favoritesService.addFavorite(
+          this.frequency, this.selectedWaveform, this.duration, this.volume
+        );
+        this.isFavorited = true;
+        await this.showToast(`${this.frequency} Hz guardado en favoritos ❤️`, 'success');
+      } catch (error) {
+        console.error('Error adding to favorites:', error);
+        await this.showToast('Error al guardar en favoritos', 'danger');
+      }
+    }
+  }
+
   applyPreset(preset: any) {
     this.frequency = preset.frequency;
-    // Aplicar configuración óptima para frecuencias curativas
-    this.volume = 25; // Volumen más suave para frecuencias curativas
-    this.duration = 10; // Duración estándar
-    this.selectedWaveform = 'sine'; // Onda senoidal es mejor para terapia
+    this.volume = 25;
+    this.duration = 10;
+    this.selectedWaveform = 'sine';
+    this.updateFavoriteStatus();
   }
 
   async togglePlayback() {
@@ -731,6 +827,17 @@ export class ManualFrequenciesPage implements OnDestroy {
     } catch (error) {
       console.error('Error force playing frequency:', error);
     }
+  }
+
+  private async showToast(message: string, color: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000,
+      position: 'top',
+      color: color,
+      cssClass: 'custom-toast'
+    });
+    await toast.present();
   }
 
   ngOnDestroy() {
